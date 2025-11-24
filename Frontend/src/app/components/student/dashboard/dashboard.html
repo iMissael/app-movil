@@ -1,0 +1,111 @@
+<div class="dashboard-container">
+  <!-- Banner de Bienvenida -->
+  <div class="welcome-banner">
+    <div class="welcome-content">
+      <h1>¡Bienvenido {{ usuario?.nombre || 'Estudiante' }}!</h1>
+      <p>Continúa tu aprendizaje en programación</p>
+    </div>
+    <div class="welcome-illustration">
+      <div class="code-icon">&lt;&#47;&gt;</div>
+    </div>
+  </div>
+
+  <!-- Tarjetas de Acceso Rápido -->
+  <div class="quick-access-grid">
+    <div class="quick-card" routerLink="/student/materias">
+      <div class="card-icon">📚</div>
+      <h3>Mis Materias</h3>
+      <p>Accede a tus materias y contenidos</p>
+    </div>
+
+    <div class="quick-card" routerLink="/student/progreso">
+      <div class="card-icon">📊</div>
+      <h3>Mi Progreso</h3>
+      <p>Revisa tu avance en el curso</p>
+    </div>
+
+    <div class="quick-card" routerLink="/student/historial">
+      <div class="card-icon">📋</div>
+      <h3>Historial</h3>
+      <p>Ver ejercicios completados</p>
+    </div>
+
+    <div class="quick-card" routerLink="/student/evaluaciones">
+      <div class="card-icon">🎯</div>
+      <h3>Evaluaciones</h3>
+      <p>Pruebas y evaluaciones</p>
+    </div>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="stats-section">
+    <h2>Mi Progreso</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ estadisticas.materiasActivas }}</div>
+        <div class="stat-label">Materias Activas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ estadisticas.ejerciciosCompletados }}</div>
+        <div class="stat-label">Ejercicios Completados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ estadisticas.progresoGeneral }}%</div>
+        <div class="stat-label">Progreso General</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avisos Importantes -->
+  <div class="announcements-section">
+    <h2>Avisos Importantes</h2>
+    <div class="announcement-card">
+      <div class="announcement-icon">💡</div>
+      <div class="announcement-content">
+        <h4>Práctica Regular</h4>
+        <p>Recuerda practicar diariamente para mejorar tus habilidades de programación.</p>
+      </div>
+    </div>
+    <div class="announcement-card">
+      <div class="announcement-icon">⚠️</div>
+      <div class="announcement-content">
+        <h4>Asistencia Disponible</h4>
+        <p>Si tienes dudas con los ejercicios, utiliza la función de asistencia con IA.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Materias Recientes -->
+  <div class="recent-courses">
+    <h2>Materias en Curso</h2>
+    <div class="courses-grid">
+      <div class="course-card">
+        <h4>Fundamentos de Programación</h4>
+        <p>Variables, estructuras de control y funciones básicas</p>
+        <div class="course-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="75"></div>
+          </div>
+          <span>75% completado</span>
+        </div>
+        <button class="btn-continue" routerLink="/student/materia/1/temas">
+          Continuar
+        </button>
+      </div>
+
+      <div class="course-card">
+        <h4>Programación Orientada a Objetos</h4>
+        <p>Clases, objetos, herencia y polimorfismo</p>
+        <div class="course-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="40"></div>
+          </div>
+          <span>40% completado</span>
+        </div>
+        <button class="btn-continue" routerLink="/student/materia/2/temas">
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

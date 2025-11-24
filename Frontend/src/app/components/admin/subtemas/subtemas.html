@@ -1,0 +1,233 @@
+<div class="subtemas-container">
+  <div class="page-header">
+    <div class="breadcrumb">
+      <button (click)="volverATemas()" class="btn-link">📚 Materias</button>
+      <span>></span>
+      <span>{{ tema?.titulo || 'Cargando...' }}</span>
+    </div>
+    <h1>Subtemas de {{ tema?.titulo || 'Cargando...' }}</h1>
+    <p>Gestiona los subtemas de este tema - {{ materia?.nombre }}</p>
+    <button (click)="crearSubtema()" class="btn-primary">
+      📑 Nuevo Subtema
+    </button>
+  </div>
+
+  <!-- Mensaje de error -->
+  @if (error) {
+    <div class="error">
+      {{ error }}
+    </div>
+  }
+
+  <!-- Formulario de Subtema -->
+  @if (mostrarFormulario) {
+    <div class="form-overlay">
+      <div class="form-container">
+        <div class="form-header">
+          <h3>{{ modoEdicion ? 'Editar Subtema' : 'Nuevo Subtema' }}</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <form (ngSubmit)="guardarSubtema()">
+          <div class="form-group">
+            <label>Título del Subtema:</label>
+            <input type="text" 
+                   [(ngModel)]="formTitulo" 
+                   name="formTitulo" 
+                   placeholder="Ej: ¿Qué son las variables?"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label>Descripción:</label>
+            <textarea 
+              [(ngModel)]="formDescripcion" 
+              name="formDescripcion" 
+              placeholder="Describe el contenido de este subtema..."
+              rows="4"
+              required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Orden:</label>
+            <input type="number" 
+                   [(ngModel)]="formOrden" 
+                   name="formOrden" 
+                   min="1"
+                   required>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              {{ modoEdicion ? 'Actualizar' : 'Crear' }} Subtema
+            </button>
+            <button type="button" (click)="cancelarEdicion()" class="btn-secondary">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de Detalles -->
+  @if (mostrarDetalles && subtemaViendo) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Detalles del Subtema</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <div class="modal-content">
+          <div class="subtema-details">
+            <div class="detail-row">
+              <strong>Título:</strong>
+              <span>{{ subtemaViendo.titulo }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Descripción:</strong>
+              <span>{{ subtemaViendo.descripcion }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Orden:</strong>
+              <span class="badge orden">{{ subtemaViendo.orden }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Fecha Creación:</strong>
+              <span>{{ formatearFecha(subtemaViendo.created_at) }}</span>
+            </div>
+            <div class="stats-row">
+              <div class="stat-item">
+                <strong>Contenidos:</strong>
+                <span class="badge info">{{ contarContenidos(subtemaViendo) }}</span>
+              </div>
+              <div class="stat-item">
+                <strong>Ejercicios:</strong>
+                <span class="badge success">{{ contarEjercicios(subtemaViendo) }}</span>
+              </div>
+            </div>
+            
+            @if (subtemaViendo.contenidos && subtemaViendo.contenidos.length > 0) {
+              <div class="contenidos-list">
+                <h4>📝 Contenidos de este Subtema</h4>
+                <div class="contenidos-grid">
+                  @for (contenido of subtemaViendo.contenidos; track contenido.id) {
+                    <div class="contenido-card" [class]="contenido.tipo">
+                      <div class="contenido-header">
+                        <span class="contenido-tipo">{{ getTipoBadge(contenido.tipo) }}</span>
+                        <span class="contenido-orden">{{ contenido.orden }}</span>
+                      </div>
+                      <h5>{{ contenido.titulo }}</h5>
+                      <p class="contenido-cuerpo">{{ contenido.cuerpo }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="empty-contenidos">
+                <p>📝 Este subtema aún no tiene contenidos.</p>
+                <button (click)="verContenidos(subtemaViendo!)" class="btn-primary">
+                  Gestionar Contenidos
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button (click)="verContenidos(subtemaViendo!)" class="btn-contenidos">
+            📝 Gestionar Contenidos
+          </button>
+          <button (click)="verEjercicios(subtemaViendo!)" class="btn-ejercicios">
+            💪 Gestionar Ejercicios
+          </button>
+          <button (click)="editarSubtema(subtemaViendo!)" class="btn-edit">
+            ✏️ Editar Subtema
+          </button>
+          <button (click)="cancelarEdicion()" class="btn-secondary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Lista de Subtemas -->
+  <div class="table-container">
+    @if (cargando) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando subtemas...</p>
+      </div>
+    }
+
+    @if (!cargando && subtemas.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📑</div>
+        <h3>No hay subtemas registrados</h3>
+        <p>Crea el primer subtema de este tema</p>
+        <button (click)="crearSubtema()" class="btn-primary">
+          Crear Primer Subtema
+        </button>
+      </div>
+    }
+
+    @if (!cargando && subtemas.length > 0) {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Orden</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Contenidos</th>
+              <th>Ejercicios</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (subtema of subtemas; track subtema.id) {
+              <tr>
+                <td>
+                  <span class="badge orden">{{ subtema.orden }}</span>
+                </td>
+                <td class="subtema-titulo">{{ subtema.titulo }}</td>
+                <td class="subtema-descripcion">
+                  {{ subtema.descripcion || 'Sin descripción' }}
+                </td>
+                <td>
+                  <span class="badge info">{{ contarContenidos(subtema) }}</span>
+                </td>
+                <td>
+                  <span class="badge success">{{ contarEjercicios(subtema) }}</span>
+                </td>
+                <td>
+                  {{ formatearFecha(subtema.created_at) }}
+                </td>
+                <td class="actions">
+                  <button (click)="verDetalles(subtema)" class="btn-view" title="Ver detalles">
+                    👁️
+                  </button>
+                  <button (click)="verContenidos(subtema)" class="btn-contenidos" title="Ver contenidos">
+                    📝
+                  </button>
+                  <button (click)="verEjercicios(subtema)" class="btn-ejercicios" title="Ver ejercicios">
+                    💪
+                  </button>
+                  <button (click)="editarSubtema(subtema)" class="btn-edit" title="Editar">
+                    ✏️
+                  </button>
+                  <button (click)="eliminarSubtema(subtema)" class="btn-delete" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

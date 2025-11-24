@@ -1,0 +1,11 @@
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-contenidos',
+  imports: [],
+  templateUrl: './contenidos.html',
+  styleUrl: './contenidos.css',
+})
+export class ContenidosComponent {
+
+}

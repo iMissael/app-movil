@@ -1,0 +1,61 @@
+<div class="materias-container">
+  <div class="page-header">
+    <h1>Mis Materias</h1>
+    <p>Selecciona una materia para continuar tu aprendizaje</p>
+  </div>
+
+  @if (cargando) {
+    <div class="loading-section">
+      <div class="spinner"></div>
+      <p>Cargando materias...</p>
+    </div>
+  }
+
+  @if (!cargando && materias.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>No tienes materias asignadas</h3>
+      <p>Contacta con tu administrador para asignarte materias.</p>
+    </div>
+  }
+
+  @if (!cargando && materias.length > 0) {
+    <div class="materias-grid">
+      @for (materia of materias; track materia.id) {
+        <div class="materia-card">
+          <div class="materia-header">
+            <h3>{{ materia.nombre }}</h3>
+            <span class="progreso-badge">{{ calcularProgreso(materia) }}%</span>
+          </div>
+          
+          <p class="materia-descripcion">{{ materia.descripcion }}</p>
+          
+          <div class="materia-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="calcularProgreso(materia)"></div>
+            </div>
+            <div class="progress-text">
+              <span>Progreso: {{ calcularProgreso(materia) }}%</span>
+              <span>{{ materia.temas_count || 0 }} temas</span>
+            </div>
+          </div>
+
+          <div class="materia-actions">
+            <button 
+              [routerLink]="['/student/materia', materia.id, 'temas']"
+              class="btn-primary">
+              Ver Temas
+            </button>
+            @if (calcularProgreso(materia) > 0) {
+              <button 
+                [routerLink]="['/student/materia', materia.id, 'ejercicios']"
+                class="btn-secondary">
+                Practicar
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

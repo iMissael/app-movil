@@ -1,0 +1,89 @@
+<div class="dashboard-container">
+  <div class="page-header">
+    <h1>Panel de Administración</h1>
+    <p>Gestión completa del sistema de aprendizaje</p>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <div class="stat-number">{{ estadisticas.totalUsuarios }}</div>
+        <div class="stat-label">Total Usuarios</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-info">
+        <div class="stat-number">{{ estadisticas.totalMaterias }}</div>
+        <div class="stat-label">Materias</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💪</div>
+      <div class="stat-info">
+        <div class="stat-number">{{ estadisticas.totalEjercicios }}</div>
+        <div class="stat-label">Ejercicios</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-info">
+        <div class="stat-number">{{ estadisticas.actividadReciente }}</div>
+        <div class="stat-label">Actividad Hoy</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones Rápidas -->
+  <div class="quick-actions">
+    <h2>Acciones Rápidas</h2>
+    <div class="actions-grid">
+      <button routerLink="/admin/usuarios" class="action-btn">
+        <span class="action-icon">👥</span>
+        <span>Gestionar Usuarios</span>
+      </button>
+      
+      <button routerLink="/admin/materias" class="action-btn">
+        <span class="action-icon">📚</span>
+        <span>Gestionar Materias</span>
+      </button>
+      
+      <button routerLink="/admin/ejercicios" class="action-btn">
+        <span class="action-icon">💪</span>
+        <span>Gestionar Ejercicios</span>
+      </button>
+      
+      <button routerLink="/admin/contenidos" class="action-btn">
+        <span class="action-icon">📝</span>
+        <span>Gestionar Contenidos</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Actividad Reciente -->
+  <div class="recent-activity">
+    <h2>Actividad Reciente</h2>
+    <div class="activity-list">
+      @for (actividad of actividadReciente; track $index) {
+        <div class="activity-item" [class]="actividad.tipo">
+          <div class="activity-icon">
+            @if (actividad.tipo === 'success') { ✅ }
+            @if (actividad.tipo === 'info') { ℹ️ }
+            @if (actividad.tipo === 'warning') { ⚠️ }
+          </div>
+          <div class="activity-content">
+            <div class="activity-text">
+              <strong>{{ actividad.usuario }}</strong> {{ actividad.accion }}
+            </div>
+            <div class="activity-time">{{ actividad.tiempo }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

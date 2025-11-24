@@ -1,0 +1,55 @@
+<div class="temas-container">
+  <div class="page-header">
+    <nav class="breadcrumb">
+      <a routerLink="/student/materias">Materias</a>
+      <span>></span>
+      <span>{{ materia?.nombre || 'Cargando...' }}</span>
+    </nav>
+    <h1>{{ materia?.nombre || 'Cargando...' }}</h1>
+    <p>{{ materia?.descripcion || '' }}</p>
+  </div>
+
+  @if (cargando) {
+    <div class="loading-section">
+      <div class="spinner"></div>
+      <p>Cargando temas...</p>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="temas-list">
+      @for (tema of temas; track tema.id; let i = $index) {
+        <div class="tema-card" [class.completado]="tema.completado">
+          <div class="tema-header">
+            <div class="tema-number">{{ i + 1 }}</div>
+            <div class="tema-info">
+              <h3>{{ tema.titulo }}</h3>
+              <p>{{ tema.descripcion }}</p>
+            </div>
+            <div class="tema-status">
+              @if (tema.completado) {
+                <span class="status-badge completado">✓ Completado</span>
+              }
+              @if (!tema.completado) {
+                <span class="status-badge pendiente">En progreso</span>
+              }
+            </div>
+          </div>
+          
+          <div class="tema-actions">
+            <button 
+              [routerLink]="['/student/tema', tema.id, 'subtemas']"
+              class="btn-primary">
+              Ver Subtemas ({{ tema.subtemas_count || 0 }})
+            </button>
+            <button 
+              [routerLink]="['/student/tema', tema.id, 'practicar']"
+              class="btn-secondary">
+              Practicar
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

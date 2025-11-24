@@ -1,0 +1,205 @@
+<div class="materias-container">
+  <div class="page-header">
+    <h1>Gestión de Materias</h1>
+    <p>Administra las materias del sistema de aprendizaje</p>
+    <button (click)="crearMateria()" class="btn-primary">
+      📚 Nueva Materia
+    </button>
+  </div>
+
+  <!-- Mensaje de error -->
+  @if (error) {
+    <div class="error">
+      {{ error }}
+    </div>
+  }
+
+  <!-- Formulario de Materia -->
+  @if (mostrarFormulario) {
+    <div class="form-overlay">
+      <div class="form-container">
+        <div class="form-header">
+          <h3>{{ modoEdicion ? 'Editar Materia' : 'Nueva Materia' }}</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <form (ngSubmit)="guardarMateria()">
+          <div class="form-group">
+            <label>Nombre de la Materia:</label>
+            <input type="text" 
+                   [(ngModel)]="formNombre" 
+                   name="formNombre" 
+                   placeholder="Ej: Fundamentos de Programación"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label>Descripción:</label>
+            <textarea 
+              [(ngModel)]="formDescripcion" 
+              name="formDescripcion" 
+              placeholder="Describe el contenido de esta materia..."
+              rows="4"
+              required></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              {{ modoEdicion ? 'Actualizar' : 'Crear' }} Materia
+            </button>
+            <button type="button" (click)="cancelarEdicion()" class="btn-secondary">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de Detalles -->
+  @if (mostrarDetalles && materiaViendo) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Detalles de la Materia</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <div class="modal-content">
+          <div class="materia-details">
+            <div class="detail-row">
+              <strong>Nombre:</strong>
+              <span>{{ materiaViendo.nombre }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Descripción:</strong>
+              <span>{{ materiaViendo.descripcion }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Fecha Creación:</strong>
+              <span>{{ formatearFecha(materiaViendo.created_at) }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Total de Temas:</strong>
+              <span class="badge info">{{ contarTemas(materiaViendo) }}</span>
+            </div>
+            
+            @if (materiaViendo.temas && materiaViendo.temas.length > 0) {
+              <div class="temas-list">
+                <h4>📖 Temas de esta Materia</h4>
+                <div class="temas-grid">
+                  @for (tema of materiaViendo.temas; track tema.id) {
+                    <div class="tema-card">
+                      <div class="tema-header">
+                        <span class="tema-orden">{{ tema.orden }}</span>
+                        <h5>{{ tema.titulo }}</h5>
+                      </div>
+                      <p class="tema-descripcion">{{ tema.descripcion }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="empty-temas">
+                <p>📝 Esta materia aún no tiene temas asignados.</p>
+                <button (click)="verTemas(materiaViendo!)" class="btn-primary">
+                  Gestionar Temas
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button (click)="verTemas(materiaViendo!)" class="btn-primary">
+            📖 Gestionar Temas
+          </button>
+          <button (click)="editarMateria(materiaViendo!)" class="btn-edit">
+            ✏️ Editar Materia
+          </button>
+          <button (click)="cancelarEdicion()" class="btn-secondary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Lista de Materias -->
+  <div class="table-container">
+    @if (cargando) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando materias...</p>
+      </div>
+    }
+
+    @if (!cargando && materias.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <h3>No hay materias registradas</h3>
+        <p>Crea la primera materia del sistema</p>
+        <button (click)="crearMateria()" class="btn-primary">
+          Crear Primera Materia
+        </button>
+      </div>
+    }
+
+    @if (!cargando && materias.length > 0) {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Temas</th>
+              <th>Progreso</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (materia of materias; track materia.id) {
+              <tr>
+                <td>{{ materia.id }}</td>
+                <td class="materia-nombre">{{ materia.nombre }}</td>
+                <td class="materia-descripcion">
+                  {{ materia.descripcion || 'Sin descripción' }}
+                </td>
+                <td>
+                  <span class="badge info">{{ contarTemas(materia) }}</span>
+                </td>
+                <td>
+                  <div class="progress-cell">
+                    <span class="progress-text">{{ materia.progreso || 0 }}%</span>
+                    <div class="progress-bar-small">
+                      <div class="progress-fill" [style.width.%]="materia.progreso || 0"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {{ formatearFecha(materia.created_at) }}
+                </td>
+                <td class="actions">
+                  <button (click)="verDetalles(materia)" class="btn-view" title="Ver detalles">
+                    👁️
+                  </button>
+                  <button (click)="verTemas(materia)" class="btn-temas" title="Ver temas">
+                    📖
+                  </button>
+                  <button (click)="editarMateria(materia)" class="btn-edit" title="Editar">
+                    ✏️
+                  </button>
+                  <button (click)="eliminarMateria(materia)" class="btn-delete" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,243 @@
+<div class="ejercicios-container">
+  <div class="page-header">
+    <div class="breadcrumb">
+      <button (click)="volverASubtemas()" class="btn-link">📚 Temas</button>
+      <span>></span>
+      <span>{{ tema?.titulo || 'Cargando...' }}</span>
+      <span>></span>
+      <span>{{ subtema?.titulo || 'Cargando...' }}</span>
+    </div>
+    <h1>Ejercicios de {{ subtema?.titulo || 'Cargando...' }}</h1>
+    <p>Gestiona los ejercicios de este subtema - {{ materia?.nombre }}</p>
+    <button (click)="crearEjercicio()" class="btn-primary">
+      💪 Nuevo Ejercicio
+    </button>
+  </div>
+
+  <!-- Mensaje de error -->
+  @if (error) {
+    <div class="error">
+      {{ error }}
+    </div>
+  }
+
+  <!-- Formulario de Ejercicio -->
+  @if (mostrarFormulario) {
+    <div class="form-overlay">
+      <div class="form-container">
+        <div class="form-header">
+          <h3>{{ modoEdicion ? 'Editar Ejercicio' : 'Nuevo Ejercicio' }}</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <form (ngSubmit)="guardarEjercicio()">
+          <div class="form-group">
+            <label>Enunciado del Ejercicio:</label>
+            <textarea 
+              [(ngModel)]="formEnunciado" 
+              name="formEnunciado" 
+              placeholder="Describe el ejercicio que deben resolver los estudiantes..."
+              rows="6"
+              required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Dificultad:</label>
+              <select 
+                [(ngModel)]="formDificultad" 
+                name="formDificultad"
+                class="form-select">
+                <option value="baja">🟢 Baja</option>
+                <option value="media">🟡 Media</option>
+                <option value="alta">🔴 Alta</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Tipo de Ejercicio:</label>
+              <select 
+                [(ngModel)]="formTipo" 
+                name="formTipo"
+                (change)="onTipoChange()"
+                class="form-select">
+                <option value="teorico">📝 Teórico</option>
+                <option value="opcion_multiple">🔘 Opción Múltiple</option>
+                <option value="codigo">💻 Código</option>
+              </select>
+            </div>
+          </div>
+
+          @if (mostrarSolucionEjemplo) {
+            <div class="form-group">
+              <label>Solución de Ejemplo:</label>
+              <textarea 
+                [(ngModel)]="formSolucionEjemplo" 
+                name="formSolucionEjemplo" 
+                placeholder="Proporciona un ejemplo de solución para este ejercicio de código..."
+                rows="8"
+                class="codigo-textarea"></textarea>
+              <small class="form-help">Este campo solo se muestra para ejercicios de tipo código</small>
+            </div>
+          }
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              {{ modoEdicion ? 'Actualizar' : 'Crear' }} Ejercicio
+            </button>
+            <button type="button" (click)="cancelarEdicion()" class="btn-secondary">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de Detalles -->
+  @if (mostrarDetalles && ejercicioViendo) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Detalles del Ejercicio</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <div class="modal-content">
+          <div class="ejercicio-details">
+            <div class="detail-row">
+              <strong>Enunciado:</strong>
+              <span class="ejercicio-enunciado-detalle">{{ ejercicioViendo.enunciado }}</span>
+            </div>
+            
+            <div class="stats-row">
+              <div class="stat-item">
+                <strong>Dificultad:</strong>
+                <span [class]="getBadgeClass(ejercicioViendo.dificultad)">
+                  {{ getDificultadBadge(ejercicioViendo.dificultad) }}
+                </span>
+              </div>
+              <div class="stat-item">
+                <strong>Tipo:</strong>
+                <span [class]="getTipoClass(ejercicioViendo.tipo)">
+                  {{ getTipoBadge(ejercicioViendo.tipo) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <strong>Subtema:</strong>
+              <span>{{ subtema?.titulo }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Fecha Creación:</strong>
+              <span>{{ formatearFecha(ejercicioViendo.created_at) }}</span>
+            </div>
+
+            @if (ejercicioViendo.solucion_ejemplo) {
+              <div class="solucion-section">
+                <h4>💡 Solución de Ejemplo</h4>
+                <div class="codigo-container">
+                  <pre class="codigo-ejemplo">{{ ejercicioViendo.solucion_ejemplo }}</pre>
+                </div>
+              </div>
+            } @else {
+              <div class="empty-solucion">
+                <p>📝 Este ejercicio no tiene solución de ejemplo configurada.</p>
+              </div>
+            }
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button (click)="editarEjercicio(ejercicioViendo!)" class="btn-edit">
+            ✏️ Editar Ejercicio
+          </button>
+          <button (click)="cancelarEdicion()" class="btn-secondary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Lista de Ejercicios -->
+  <div class="table-container">
+    @if (cargando) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando ejercicios...</p>
+      </div>
+    }
+
+    @if (!cargando && ejercicios.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">💪</div>
+        <h3>No hay ejercicios registrados</h3>
+        <p>Crea el primer ejercicio de este subtema</p>
+        <button (click)="crearEjercicio()" class="btn-primary">
+          Crear Primer Ejercicio
+        </button>
+      </div>
+    }
+
+    @if (!cargando && ejercicios.length > 0) {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Enunciado</th>
+              <th>Dificultad</th>
+              <th>Tipo</th>
+              <th>Solución Ejemplo</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ejercicio of ejercicios; track ejercicio.id) {
+              <tr>
+                <td>{{ ejercicio.id }}</td>
+                <td class="ejercicio-enunciado">
+                  {{ recortarTexto(ejercicio.enunciado, 60) }}
+                </td>
+                <td>
+                  <span [class]="getBadgeClass(ejercicio.dificultad)">
+                    {{ getDificultadBadge(ejercicio.dificultad) }}
+                  </span>
+                </td>
+                <td>
+                  <span [class]="getTipoClass(ejercicio.tipo)">
+                    {{ getTipoBadge(ejercicio.tipo) }}
+                  </span>
+                </td>
+                <td class="solucion-ejemplo">
+                  @if (ejercicio.solucion_ejemplo) {
+                    <span class="badge success">✅ Disponible</span>
+                  } @else {
+                    <span class="badge secondary">❌ No disponible</span>
+                  }
+                </td>
+                <td>
+                  {{ formatearFecha(ejercicio.created_at) }}
+                </td>
+                <td class="actions">
+                  <button (click)="verDetalles(ejercicio)" class="btn-view" title="Ver detalles">
+                    👁️
+                  </button>
+                  <button (click)="editarEjercicio(ejercicio)" class="btn-edit" title="Editar">
+                    ✏️
+                  </button>
+                  <button (click)="eliminarEjercicio(ejercicio)" class="btn-delete" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

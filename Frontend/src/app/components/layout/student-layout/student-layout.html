@@ -1,0 +1,78 @@
+<div class="layout-container">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.collapsed]="isCollapsed">
+    <div class="sidebar-header">
+      <h2>ITO Programación</h2>
+      <p>{{ usuario?.nombre || 'Estudiante' }}</p>
+    </div>
+
+    <div class="search-box">
+      <input type="text" placeholder="Buscar en el menú..." [(ngModel)]="searchTerm">
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <h3>Inicio</h3>
+        <ul>
+          <li>
+            <a routerLink="/student/dashboard" routerLinkActive="active" (click)="toggleMenu()">
+              🏠 Dashboard
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/materias" routerLinkActive="active" (click)="toggleMenu()">
+              📚 Mis Materias
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/progreso" routerLinkActive="active" (click)="toggleMenu()">
+              📊 Mi Progreso
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/historial" routerLinkActive="active" (click)="toggleMenu()">
+              📋 Historial
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <h3>Configuración</h3>
+        <ul>
+          <li>
+            <a routerLink="/student/perfil" routerLinkActive="active" (click)="toggleMenu()">
+              👤 Mis Datos
+            </a>
+          </li>
+          <li>
+            <a (click)="toggleSidebar()" class="toggle-btn">
+              @if (isCollapsed) {
+                📂 Mostrar menú
+              } @else {
+                📁 Ocultar menú
+              }
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" [class.sidebar-collapsed]="isCollapsed">
+    <header class="main-header">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        ☰
+      </button>
+      <div class="header-actions">
+        <span>Bienvenido {{ usuario?.nombre || 'Estudiante' }}</span>
+        <button (click)="logout()" class="logout-btn">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

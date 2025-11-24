@@ -1,0 +1,130 @@
+<div class="ejercicios-container">
+  <div class="page-header">
+    <h1>Práctica con IA</h1>
+    <p>Genera ejercicios personalizados y recibe retroalimentación instantánea</p>
+  </div>
+
+  <!-- Panel de Generación -->
+  <div class="generation-panel">
+    <div class="panel-header">
+      <h2>Generar Nuevo Ejercicio</h2>
+      <button 
+        (click)="generarEjercicio()" 
+        [disabled]="cargando" 
+        class="btn-generate">
+        @if (cargando) {
+          🔄 Generando...
+        } @else {
+          🚀 Generar Ejercicio
+        }
+      </button>
+    </div>
+
+    @if (ejercicioGenerado) {
+      <div class="ejercicio-section">
+        <div class="section-header">
+          <h3>📝 Ejercicio Generado</h3>
+          <button (click)="limpiarEjercicio()" class="btn-clear">🗑️ Limpiar</button>
+        </div>
+        <div class="ejercicio-content">
+          <pre>{{ ejercicioGenerado }}</pre>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (ejercicioGenerado) {
+    <!-- Panel de Respuesta -->
+    <div class="response-panel">
+      <h3>✍️ Tu Solución</h3>
+      <textarea 
+        [(ngModel)]="respuestaUsuario" 
+        placeholder="Escribe tu código o solución aquí..."
+        rows="10"
+        class="response-textarea">
+      </textarea>
+      
+      <button 
+        (click)="evaluarRespuesta()" 
+        [disabled]="evaluando || !respuestaUsuario.trim()"
+        class="btn-evaluate">
+        @if (evaluando) {
+          🔍 Evaluando...
+        } @else {
+          ✅ Evaluar Respuesta
+        }
+      </button>
+    </div>
+  }
+
+  @if (evaluacion) {
+    <!-- Panel de Evaluación -->
+    <div class="evaluation-panel">
+      <h3>📊 Resultado de la Evaluación</h3>
+      <div class="evaluation-result" [class.correct]="evaluacion.correcto" [class.incorrect]="!evaluacion.correcto">
+        <div class="result-header">
+          <span class="result-icon">
+            @if (evaluacion.correcto) {
+              ✅
+            } @else {
+              ❌
+            }
+          </span>
+          <span class="result-text">
+            @if (evaluacion.correcto) {
+              ¡Correcto!
+            } @else {
+              Necesitas mejorar
+            }
+          </span>
+        </div>
+        
+        <div class="result-details">
+          <div class="detail-section">
+            <h4>📖 Explicación:</h4>
+            <p>{{ evaluacion.explicacion }}</p>
+          </div>
+          
+          @if (evaluacion.sugerencias) {
+            <div class="detail-section">
+              <h4>💡 Sugerencias:</h4>
+              <p>{{ evaluacion.sugerencias }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Historial -->
+  <div class="history-panel">
+    <h3>📋 Historial de Práctica</h3>
+    @if (historial.length === 0) {
+      <div class="empty-history">
+        <p>Aún no has completado ejercicios. ¡Comienza a practicar!</p>
+      </div>
+    }
+    
+    @if (historial.length > 0) {
+      <div class="history-list">
+        @for (item of historial; track item.id) {
+          <div class="history-item" [class.correct]="item.correcto">
+            <div class="history-status">
+              <span class="status-icon">
+                @if (item.correcto) {
+                  ✅
+                } @else {
+                  ❌
+                }
+              </span>
+            </div>
+            <div class="history-content">
+              <p class="history-question">{{ item.pregunta }}</p>
+              <span class="history-date">{{ item.fecha | date:'medium' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

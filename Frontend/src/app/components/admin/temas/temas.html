@@ -1,0 +1,216 @@
+<div class="temas-container">
+  <div class="page-header">
+    <div class="breadcrumb">
+      <button (click)="volverAMaterias()" class="btn-link">📚 Materias</button>
+      <span>></span>
+      <span>{{ materia?.nombre || 'Cargando...' }}</span>
+    </div>
+    <h1>Temas de {{ materia?.nombre || 'Cargando...' }}</h1>
+    <p>Gestiona los temas de esta materia</p>
+    <button (click)="crearTema()" class="btn-primary">
+      📖 Nuevo Tema
+    </button>
+  </div>
+
+  <!-- Mensaje de error -->
+  @if (error) {
+    <div class="error">
+      {{ error }}
+    </div>
+  }
+
+  <!-- Formulario de Tema -->
+  @if (mostrarFormulario) {
+    <div class="form-overlay">
+      <div class="form-container">
+        <div class="form-header">
+          <h3>{{ modoEdicion ? 'Editar Tema' : 'Nuevo Tema' }}</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <form (ngSubmit)="guardarTema()">
+          <div class="form-group">
+            <label>Título del Tema:</label>
+            <input type="text" 
+                   [(ngModel)]="formTitulo" 
+                   name="formTitulo" 
+                   placeholder="Ej: Variables y Tipos de Datos"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label>Descripción:</label>
+            <textarea 
+              [(ngModel)]="formDescripcion" 
+              name="formDescripcion" 
+              placeholder="Describe el contenido de este tema..."
+              rows="4"
+              required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Orden:</label>
+            <input type="number" 
+                   [(ngModel)]="formOrden" 
+                   name="formOrden" 
+                   min="1"
+                   required>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              {{ modoEdicion ? 'Actualizar' : 'Crear' }} Tema
+            </button>
+            <button type="button" (click)="cancelarEdicion()" class="btn-secondary">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de Detalles -->
+  @if (mostrarDetalles && temaViendo) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Detalles del Tema</h3>
+          <button (click)="cancelarEdicion()" class="btn-close">×</button>
+        </div>
+        
+        <div class="modal-content">
+          <div class="tema-details">
+            <div class="detail-row">
+              <strong>Título:</strong>
+              <span>{{ temaViendo.titulo }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Descripción:</strong>
+              <span>{{ temaViendo.descripcion }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Orden:</strong>
+              <span class="badge orden">{{ temaViendo.orden }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Fecha Creación:</strong>
+              <span>{{ formatearFecha(temaViendo.created_at) }}</span>
+            </div>
+            <div class="detail-row">
+              <strong>Total de Subtemas:</strong>
+              <span class="badge info">{{ contarSubtemas(temaViendo) }}</span>
+            </div>
+            
+            @if (temaViendo.subtemas && temaViendo.subtemas.length > 0) {
+              <div class="subtemas-list">
+                <h4>📑 Subtemas de este Tema</h4>
+                <div class="subtemas-grid">
+                  @for (subtema of temaViendo.subtemas; track subtema.id) {
+                    <div class="subtema-card">
+                      <div class="subtema-header">
+                        <span class="subtema-orden">{{ subtema.orden }}</span>
+                        <h5>{{ subtema.titulo }}</h5>
+                      </div>
+                      <p class="subtema-descripcion">{{ subtema.descripcion }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="empty-subtemas">
+                <p>📝 Este tema aún no tiene subtemas asignados.</p>
+                <button (click)="verSubtemas(temaViendo!)" class="btn-primary">
+                  Gestionar Subtemas
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button (click)="verSubtemas(temaViendo!)" class="btn-primary">
+            📑 Gestionar Subtemas
+          </button>
+          <button (click)="editarTema(temaViendo!)" class="btn-edit">
+            ✏️ Editar Tema
+          </button>
+          <button (click)="cancelarEdicion()" class="btn-secondary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Lista de Temas -->
+  <div class="table-container">
+    @if (cargando) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando temas...</p>
+      </div>
+    }
+
+    @if (!cargando && temas.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📖</div>
+        <h3>No hay temas registrados</h3>
+        <p>Crea el primer tema de esta materia</p>
+        <button (click)="crearTema()" class="btn-primary">
+          Crear Primer Tema
+        </button>
+      </div>
+    }
+
+    @if (!cargando && temas.length > 0) {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Orden</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Subtemas</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tema of temas; track tema.id) {
+              <tr>
+                <td>
+                  <span class="badge orden">{{ tema.orden }}</span>
+                </td>
+                <td class="tema-titulo">{{ tema.titulo }}</td>
+                <td class="tema-descripcion">
+                  {{ tema.descripcion || 'Sin descripción' }}
+                </td>
+                <td>
+                  <span class="badge info">{{ contarSubtemas(tema) }}</span>
+                </td>
+                <td>
+                  {{ formatearFecha(tema.created_at) }}
+                </td>
+                <td class="actions">
+                  <button (click)="verDetalles(tema)" class="btn-view" title="Ver detalles">
+                    👁️
+                  </button>
+                  <button (click)="verSubtemas(tema)" class="btn-subtemas" title="Ver subtemas">
+                    📑
+                  </button>
+                  <button (click)="editarTema(tema)" class="btn-edit" title="Editar">
+                    ✏️
+                  </button>
+                  <button (click)="eliminarTema(tema)" class="btn-delete" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
